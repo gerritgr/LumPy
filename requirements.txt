@@ -1,0 +1,12 @@
+pandas
+seaborn
+numpy
+matplotlib
+networkx
+symengine
+imageio
+scipy
+pathos
+blist
+sympy
+tqdm

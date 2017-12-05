@@ -1,0 +1,13 @@
+states = ["I", "S", "R"]
+degree_distribution = lambda x: x**(-2.1) if x > 1 else 0.00001
+initial_distribution = {'I': 0.90, 'S': 0.05, 'R' :0.05}
+horizon = 2.0
+k_max = 35 #50
+
+R1: I+S -> S+S  with 6.0
+R2: S+R -> R+R with 0.7
+R3: S+S -> R+S with 0.7
+
+bin_num = 3
+
+output_dir = output/opinion_4

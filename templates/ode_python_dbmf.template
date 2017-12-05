@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+# -*- coding: UTF-8 -*-
+
+from scipy.integrate import odeint
+import numpy as np
+import matplotlib
+matplotlib.use('agg')	#run without an X-server
+import matplotlib.pyplot as plt
+from timeit import default_timer as timer
+import sys
+sys.dont_write_bytecode = True
+
+t = np.linspace(0,  {model['horizon']}, {model['eval_points']})
+points = len(t)
+odes_per_state = {model['odes_per_state']}
+solver_steps = 0
+
+bin_distribution = {dict_to_liststr(model['bin_distribution'])}
+mean_bin_degree =  {dict_to_liststr(model['degree_statistics']['<k>'])}
+mean_degree = np.sum([bin_distribution[i] * mean_bin_degree[i] for i in range(len(bin_distribution))])
+# binnning = {model['bins']}
+
+def f(x, t):
+	global solver_steps
+	x[x<=0.0] = 10**(-20)
+	solver_steps += 1
+{ode_text}
+
+def odeint_adams(f, init, time_points, integrator = 'lsoda'):
+	def f_ode(t, u):
+		return f(u,t)
+
+	from scipy.integrate import ode
+	r = ode(f_ode).set_integrator(integrator, atol=1e-6, with_jacobian=False)
+	r.set_initial_value(init, 0)
+	step = 0
+	u = [];
+	t = []
+	if time_points[0] == 0.0:
+			time_points = time_points[1:]
+			u.append(np.array(init))
+	T = len(time_points)
+	while r.successful() and step < T:
+			r.integrate(time_points[step])
+			step += 1
+			u.append(r.y);
+			t.append(r.t)
+	u = np.array(u)
+	return u
+
+
+def solve_odes():
+	init = {model['init']} #[1.0 / {len(model['states'])}]*{model['number_of_odes']}
+	sol = odeint(f, init, t)
+	#sol = odeint_adams(f, init, t)
+	return sol
+
+def compute_results():
+	start = timer()
+	sol = solve_odes()
+	end = timer()
+	time_elapsed = end - start
+	print('time elapsed: ', time_elapsed)
+	{template_summary}
+
+
+def plot_and_write(folder=''):
+	import os
+	trajectories, time, time_elapsed, solver_steps = compute_results()
+	if folder == '':
+		folder = os.path.dirname(os.path.realpath(__file__)) + '/'
+	if folder != '' and not os.path.exists(folder):
+		os.makedirs(folder)
+	# write csv
+	with open(folder+'{model['name']}_DBMF.csv', 'w') as f:
+		sep=';'
+		states = sorted(list(trajectories.keys()))
+		f.write('sep=;\n')
+		f.write('time'+sep+sep.join(states)+'\n')
+		for i in range(len(trajectories[states[0]])):
+			f.write(str(time[i])+sep)
+			for state in states:
+				s = sep if state != states[-1] else ''
+				f.write(str(trajectories[state][i])+s)
+			if i != range(len(trajectories[states[0]]))[-1]:
+				f.write('\n')
+
+	# plot
+	plt.clf()
+	for state in trajectories:
+		plt.plot(t, trajectories[state], label=state)
+	plt.legend(loc='best')
+	plt.xlabel('Time')
+	plt.grid()
+	plt.savefig(folder+'{model['name']}_plotDBMF.pdf', format='pdf', bbox_inches='tight')
+	#plt.show()
+	return trajectories, time, time_elapsed, solver_steps
+
+if __name__ == '__main__':
+	plot_and_write()
+
+
+# ---------------
+# Model
+# ---------------
+{model_to_str(model)}

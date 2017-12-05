@@ -1,0 +1,10 @@
+states = ["R", "I", "S"]
+degree_distribution = lambda x: x**(-2.4) if x > 0 else 0.00001
+initial_distribution = {'S': 0.1, 'I': 0.1, 'R' :0.1}
+horizon = 2
+k_max = 40 #60
+R1: S+I -> I+I  with 6.0
+R2: I -> R with 4.0
+R3: R -> S with 1.0
+
+bin_num = 20

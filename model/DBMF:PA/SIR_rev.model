@@ -1,0 +1,13 @@
+states = ["R", "I", "S"]
+degree_distribution = lambda x: x**(-2.4) if x > 0 else 0.0
+initial_distribution = {'S': 0.99, 'I': 0.01/2.0, 'R' :0.01/2.0}
+horizon = 2
+k_max = 1000
+R1: S+I -> I+I  with 6.0
+R2: I -> R with 4.0
+R3: R -> S with 1.0
+
+bin_num = 1000
+
+output_dir = output/SIR_rev
+heuristic = hierarchical2d

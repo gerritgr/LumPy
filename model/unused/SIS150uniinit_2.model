@@ -1,0 +1,9 @@
+states = ["I", "S"]
+degree_distribution = lambda x: x**(-2.4) if x > 0 else 0.00001
+initial_distribution = {'S': 0.5, 'I': 0.5}
+horizon = 5
+k_max = 150
+R1: S+I -> I+I  with 2.5
+R3: I -> S with 1.0
+init=multinomial
+bin_num = auto

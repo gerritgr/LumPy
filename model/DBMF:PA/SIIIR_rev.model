@@ -1,0 +1,15 @@
+states = ["I", "S", "II", "III", "R"]
+degree_distribution = lambda x: x**(-2.5) if x > 0 else 0.0
+initial_distribution = {'I': 0.01/4.0, 'S': 0.99, 'II': 0.01/4.0, 'III': 0.01/4.0, 'R' : 0.01/4.0}
+horizon = 2.0
+k_max = 100
+R1: S+I -> I+I  with 5.0 #3.5
+R1b: S+II -> I+II  with 1.5#2.0
+R1c: S+III -> I+III  with 1.0
+R2: I -> II with 2.0
+R3: II -> III with 2.0
+R4: III -> R with 2.0
+R5: R -> S with 2.0
+bin_num = 100
+heuristic = hierarchical2d
+output_dir = output/SIIIR_rev

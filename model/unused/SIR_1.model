@@ -1,0 +1,11 @@
+states = ["R", "I", "S"]
+degree_distribution = lambda x: x**(-2.5) if x > 0 else 0.00001
+initial_distribution = {'S': 0.95, 'I': 0.025, 'R' :0.025}
+horizon = 3
+k_max = 20
+R1: S+I -> I+I  with 5.0
+R2: I -> R with 0.5
+R3: R -> S with 1.0
+
+output_dir = output/SIR_1
+bin_num = 5

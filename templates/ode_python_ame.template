@@ -1,0 +1,190 @@
+from scipy.integrate import odeint
+import numpy as np
+import matplotlib
+matplotlib.use('agg')	#run without an X-server
+import matplotlib.pyplot as plt
+from timeit import default_timer as timer
+import pandas as pd
+import sys
+import os
+from tqdm import tqdm
+sys.dont_write_bytecode = True
+
+folder = os.path.dirname(os.path.abspath(__file__)) + '/'
+data = pd.read_csv(folder+'ame_frame_lumped_{model['name']}.csv', sep=',')
+data['m'] = data.apply(lambda l: eval(l['m']), axis=1)
+init = list(data['initial_value'])
+data = data.to_dict(orient='records')
+
+t = np.linspace(0,  {model['horizon']}, {model['eval_points']})
+points = len(t)
+solver_steps = 0
+states = {model['states']}
+
+independent_rules = {model['independent_rules']}
+contact_rules = {model['contact_rules']}
+
+x = dict()
+dt_x = dict()
+
+def rate_s1_to_s2(state, s1, s2, m, V):
+	rate_sum = 0.0
+	state_i = states.index(state)
+	for rule in independent_rules:
+		consume, product, rate = rule
+		if consume == s1 and product == s2:
+			rate_sum += rate * m[state_i]
+	for rule in contact_rules:
+		consume1 = rule[0][0]
+		consume2 = rule[0][1]
+		product1 = rule[1][0]
+		product2 = rule[1][1]
+		rate = rule[2]
+		if consume1 == s1 and product1 == s2:
+			consume2_i = states.index(consume2)
+			#consume2_count = m[consume2_i] * m[state_i]
+			consume2_count = V[consume2_i, state_i]  #m[consume2_i] * m[state_i]
+			rate_sum += rate * consume2_count
+	return rate_sum
+
+def rates(state,s1,s2):
+	global x
+	rate = 0.0
+	state_i = states.index(state)
+	for ode in data:
+		if ode['state'] != s1:
+			continue
+		#ngbr_count = ode['m'][state_i]
+		fraction_by_degree = x[ode['name']]
+		degree_prob = ode['degree_prob_sum']
+		V = np.asarray(eval(ode['mixed_mom_matrix']))
+		rate_of_m = rate_s1_to_s2(state, s1, s2, ode['m'], V)
+		rate += rate_of_m*fraction_by_degree*degree_prob
+	return rate
+
+
+def edges(state, s1):
+	global x
+	fraction = 0.0
+	state_i = states.index(state)
+	for ode in data:
+		if ode['state'] != s1:
+			continue
+		ngbr_count = ode['m'][state_i]
+		fraction_by_degree = x[ode['name']]
+		degree_prob = ode['degree_prob_sum']
+		value = ngbr_count*degree_prob*fraction_by_degree
+		fraction += value
+	return fraction
+
+def f(x_flat, t):
+	global solver_steps, x, dt_x
+	solver_steps += 1
+	x_flat[x_flat<=0.0] = 10**(-30)
+	dt_x_flat = np.zeros(len(x_flat), dtype=np.double)
+	for i in range(len(x_flat)):
+		x[data[i]['name']] = x_flat[i]
+{ode_text}
+	for i in range(len(x_flat)):
+		dt_x_flat[i]=dt_x[data[i]['name']]
+	return dt_x_flat
+
+#def odeint_adams(f, init, time_points, integrator = 'lsoda'):
+def odeint_adams(f, init, time_points, integrator = 'vode'):  # use vode for a rougher estimate
+	def f_ode(t, u):
+		return f(u,t)
+
+	from scipy.integrate import ode
+	#r = ode(f_ode).set_integrator(integrator,rtol=1e-4, atol=1e-5, with_jacobian=False, method='adams') # use this for a rougher estimate
+	r = ode(f_ode).set_integrator(integrator, with_jacobian=False, method='adams')
+	r.set_initial_value(init, 0)
+	step = 0
+	u = [];
+	t = []
+	if time_points[0] == 0.0:
+			time_points = time_points[1:]
+			u.append(np.array(init))
+	T = len(time_points)
+	pbar = tqdm(total=T)
+	pbar.set_description('ODE progress')
+	while r.successful() and step < T:
+			r.integrate(time_points[step])
+			step += 1
+			pbar.update(1)
+			u.append(r.y);
+			t.append(r.t)
+	u = np.array(u)
+	pbar.close()
+	return u
+
+
+def solve_odes(write_csv = True):
+	global init
+	init = np.array(init, dtype = np.double)
+	#sol = odeint(f, init, t)
+	sol = odeint_adams(f, init, t)
+	if write_csv:
+		ode_ids = [(ode['state']+'_'+str(ode['m'])).replace(',',';') for ode in data]
+		np.savetxt(folder+'{model['name']}.csv', sol, delimiter=',', header='sep=,\n'+','.join(ode_ids), comments='')
+	return sol
+
+
+def plot():
+	plt.clf()
+	import matplotlib as mpl
+	mpl.rc('xtick', labelsize=16)
+	mpl.rc('ytick', labelsize=16)
+	fig, ax = plt.subplots()
+	ax.set_ylabel('Fractions', fontsize=16)
+	ax.set_xlabel('Time',fontsize=16)
+	start = timer()
+	sol = solve_odes()
+	end = timer()
+	time_elapsed = end - start
+	results = dict()
+	for ode in data:
+		s = ode['state']
+		results[s] = list()
+
+	for t_i in range(len(sol)):
+		system_state = sol[t_i]
+		for key in results:
+			results[key].append(0.0)
+		for ode_i in range(len(system_state)):
+			ode_value = system_state[ode_i]
+			degree_prob = data[ode_i]['degree_prob_sum']
+			state = data[ode_i]['state']
+			results[state][-1] += ode_value*degree_prob
+
+	ax.grid()
+	color_map = plt.get_cmap('plasma')
+	state_c = list(np.linspace(0.01,0.99,len(states)))
+	for state, values in sorted(results.items(), key = lambda x: x[0]):
+		ax.plot(t, values, label=state, linewidth = 3, color=color_map(state_c.pop()))
+	ax.legend(loc='best')
+	plt.savefig(folder+'results_{model['name']}.pdf', format='pdf', bbox_inches='tight')
+	#pickle.dump(ax, open(folder+'results_{model['name']}.pickle', 'wb'))
+	#plt.show()
+	with open(folder+'{model['name']}_{model['actual_cluster_number']}_trajectories.csv', 'w') as f:
+		sep=','
+		f.write('sep=,\n')
+		f.write('time'+sep+sep.join(states)+'\n')
+		for i in range(len(results[states[0]])):
+			f.write(str(t[i])+sep)
+			for state in states:
+				s = sep if state != states[-1] else ''
+				f.write(str(results[state][i])+s)
+			if i != range(len(results[states[0]]))[-1]:
+				f.write('\n')
+
+	return results, t, time_elapsed
+
+if __name__ == '__main__':
+	plot()
+
+
+
+# ---------------
+# Model
+# ---------------
+# {model['modeltext']}
