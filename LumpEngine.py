@@ -165,7 +165,7 @@ def lump(df, scale_during_substitution = True):
 	logger.info('Compute lumped ODEs.')
 	from multiprocessing import Pool, cpu_count
 	cores = cpu_count()
-	data_split = np.array_split(df, cores*10)
+	data_split = np.array_split(df, len(df.index))
 	pool = Pool(cores)
 	new_data = pool.map(compute_formula_torow, data_split)
 	data = pd.concat(new_data)
