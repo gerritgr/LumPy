@@ -8,6 +8,6 @@ R1: I+S -> S+S  with 6.0
 R2: S+R -> R+R with 1.7
 R3: S+S -> R+S with 0.7
 
-bin_num = 3
+bin_num = auto
 
 output_dir = output/opinion_4
