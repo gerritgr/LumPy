@@ -8,4 +8,4 @@ R2: I -> R with 0.5
 R3: R -> S with 1.0
 
 output_dir = output/SIR_1
-bin_num = 5
+bin_num = auto
