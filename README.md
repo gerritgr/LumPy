@@ -118,7 +118,7 @@ bin_num = 25                                                  # DBMF/PA: number 
 on Lumping:
 
 * Kyriakopoulos et al.
-["Lumping of Degree Based Mean Field and Pair Approximation Equations for Multi-State Contact Processes"](https://arxiv.org/abs/1706.06964)
+["Lumping of Degree Based Mean Field and Pair Approximation Equations for Multi-State Contact Processes"](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.97.012301)
 * G. Großmann
 "Lumping the Approximate Master Equation for Stochastic Processes on Complex Networks" (Master's thesis)
 
