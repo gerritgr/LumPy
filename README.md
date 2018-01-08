@@ -80,6 +80,8 @@ pa.py and dbmf.py only output the generated script and their respective solution
 
 ## Model Descriptions
 -----------------
+(Will be replaced with YAML soon.)
+
 The model files (placed in the model directory by default) specify the contact process, the network, initial fractions, the number of bins, etc. They are mostly self-explanatory, however, SIR.model contains a detailed description of the structure of a model file. An example SIR model file contains:
 ```
 states = ["R", "I", "S"]                                      # states names are strings containing only a-z and A-Z, "#"" introduces a comment
