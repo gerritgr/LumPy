@@ -169,7 +169,10 @@ def compute_contact_rates(contact_rules, graph):
 		rule = contact_rules[i]
 		candidates = list()
 		for edge in edges:
-			if ((labels[edge[0]],labels[edge[1]]) == rule[0] or (labels[edge[1]],labels[edge[0]]) == rule[0]):
+			if ((labels[edge[0]],labels[edge[1]]) == rule[0] or (labels[edge[1]],labels[edge[0]]) == rule[0]) and rule[0][0] == rule[0][1]:
+				candidates.append(edge) # 2x if applicable both ways
+				candidates.append(edge)
+			elif ((labels[edge[0]],labels[edge[1]]) == rule[0] or (labels[edge[1]],labels[edge[0]]) == rule[0]):
 				candidates.append(edge)
 		rates[i] = float(rule[2]) * len(candidates)
 	return rates
