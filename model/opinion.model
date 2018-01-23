@@ -1,12 +1,11 @@
 states = ["I", "S", "R"]
-degree_distribution = lambda x: x**(-2.2) if x > 0 else 0.00001
-initial_distribution = {'I': 0.95, 'S': 0.025, 'R' :0.025}
+degree_distribution = lambda x: x**(-2.5) if x > 1 else 0.00001
+initial_distribution = {'I': 0.95, 'S': 0.04, 'R' :0.01}
 horizon = 1.0
-k_max = 40 #50
+k_max = 35
 
-R1: I+S -> S+S  with 6.0
-R2: S+R -> R+R with 4.0
+R1: I+S -> S+S  with 9.0
+R2: S+R -> R+R with 5.0
 R3: S+S -> R+S with 0.7
 
 bin_num = auto
-
