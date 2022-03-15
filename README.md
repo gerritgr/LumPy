@@ -32,6 +32,7 @@ Fist, install [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
 Then,
 ```sh
 conda env create -f environment.yml
+conda activate lumpy
 ```
 
 ## Example Usage
