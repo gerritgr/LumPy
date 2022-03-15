@@ -46,6 +46,15 @@ optional arguments:
   --nolumping  generate original equations without lumping
 ```
 Optimal arguments overwrite the modelfile specification.
+
+##### Use with Miniconda:
+To use Lumpy in a Conda environment:
+Fist, install [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
+Then,
+```sh
+conda env create -f environment.yml
+```
+
 ##### Caution:
 * The code uses eval and exec, please use with sanitized input only.
 * Existing files are overwritten without warning.
