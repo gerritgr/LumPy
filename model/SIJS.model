@@ -1,0 +1,12 @@
+states = ["J", "I", "S"]
+degree_distribution = lambda x: x**(-2.5) if x > 0 else 0.00001
+initial_distribution = {'S': 0.95, 'I': 0.025, 'J' :0.025}
+horizon = 3
+k_max = 35
+R1: S+I -> I+I  with 4.0
+R2: S+J -> I+J  with 2.0
+R3: I -> J with 1.0
+R4: J -> S with 1.0
+
+output_dir = output/SIJS
+bin_num = auto
