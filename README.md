@@ -35,6 +35,8 @@ conda env create -f environment.yml
 conda activate lumpy
 ```
 
+(There still seems to be an issue with the plotting. See (https://gist.github.com/gerritgr/d2bff76485d208ae912922b960b3efe5) on how the remove the problematic line.  )
+
 ## Example Usage
 -----------------
 Typically, you run LumPy like this
